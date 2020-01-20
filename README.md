@@ -1,2 +1,9 @@
-# Multi_Label_Classification
-multi label classification
+# Multi Label Classification
+
+# Datasets
+- Pascal VOC 2007
+
+# Model
+- VGG16
+
+
