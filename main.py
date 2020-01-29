@@ -1,11 +1,11 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-from models import VGG
+from models import load_model
 import torchvision.transforms as transforms
 from datasets.loader import VOC
-
 
 VOC_CLASSES = (
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -14,9 +14,9 @@ VOC_CLASSES = (
     'motorbike', 'person', 'pottedplant',
     'sheep', 'sofa', 'train', 'tvmonitor'
 )
-
-batch_size = 16
-epoch = 200
+MODEL_PATH = 'model.h5'
+BATCH_SIZE = 16
+EPOCH = 200
 
 if torch.cuda.is_available():
     device = 'cuda'
@@ -35,11 +35,12 @@ valid_transformer = transforms.Compose([transforms.Resize((224, 224)),
                                         transforms.ToTensor(),
                                         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 
-voc = VOC(batch_size=batch_size, year="2007")
+voc = VOC(batch_size=BATCH_SIZE, year="2007")
 train_loader = voc.get_loader(transformer=train_transformer, type='train')
 valid_loader = voc.get_loader(transformer=valid_transformer, type='val')
 
-model = VGG()
+model = load_model(MODEL_PATH, train=True)
+
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
                                            milestones=[50, 100, 150],
@@ -50,7 +51,7 @@ best_loss = 100
 train_iter = len(train_loader)
 valid_iter = len(valid_loader)
 
-for e in range(epoch):
+for e in range(EPOCH):
     train_loss = 0
     valid_loss = 0
 

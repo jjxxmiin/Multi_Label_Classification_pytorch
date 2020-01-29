@@ -1,14 +1,19 @@
-import torch.nn as nn
+import os
 import torch
-import torch.nn.functional as F
+import torch.nn as nn
 
 
-def load_model(load_path, mode, device='cuda'):
+def load_model(load_path, train, device='cuda'):
     model = VGG().to(device)
-    model.load_state_dict(torch.load(load_path))
 
-    if mode == 'eval':
-        model = model.eval()
+    if os.path.exists(load_path):
+        model.load_state_dict(torch.load(load_path))
+
+        if not train:
+            model = model.eval()
+        print("LOAD MODEL")
+    else:
+        print("NEW MODEL")
 
     return model
 
