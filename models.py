@@ -3,6 +3,15 @@ import torch
 import torch.nn.functional as F
 
 
+def load_model(load_path, mode, device='cuda'):
+    model = VGG().to(device)
+    model.load_state_dict(torch.load(load_path))
+
+    if mode == 'eval':
+        model = model.eval()
+
+    return model
+
 class VGG(nn.Module):
     def __init__(self, classes=20):
         super(VGG, self).__init__()

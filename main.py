@@ -1,13 +1,11 @@
-import os
-from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from tqdm import tqdm
 from models import VGG
 import torchvision.transforms as transforms
 from datasets.loader import VOC
-from torch.autograd import Variable
-from utils import save_tensor_image
+
 
 VOC_CLASSES = (
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -31,14 +29,15 @@ else:
 train_transformer = transforms.Compose([transforms.RandomHorizontalFlip(),
                                         transforms.Resize((224, 224)),
                                         transforms.ToTensor(),
-                                        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+                                        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 
-test_transformer = transforms.Compose([transforms.ToTensor(),
-                                       transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))])
+valid_transformer = transforms.Compose([transforms.Resize((224, 224)),
+                                        transforms.ToTensor(),
+                                        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
 
 voc = VOC(batch_size=batch_size, year="2007")
 train_loader = voc.get_loader(transformer=train_transformer, type='train')
-valid_loader = voc.get_loader(transformer=train_transformer, type='val')
+valid_loader = voc.get_loader(transformer=valid_transformer, type='val')
 
 model = VGG()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
@@ -51,7 +50,7 @@ best_loss = 100
 train_iter = len(train_loader)
 valid_iter = len(valid_loader)
 
-for epoch in range(epoch):
+for e in range(epoch):
     train_loss = 0
     valid_loss = 0
 
@@ -93,6 +92,8 @@ for epoch in range(epoch):
         best_loss = total_valid_loss
 
 """
+from utils import save_tensor_image
+
 for image, targets in train_loader:
     save_tensor_image(image[0])
     print(targets)
