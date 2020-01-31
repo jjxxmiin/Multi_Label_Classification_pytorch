@@ -57,17 +57,25 @@ class VOC(object):
 
         self.classes = 20
         self.batch_size = batch_size
-        self.img_path = './datasets/voc/VOC{}/JPEGImages'.format(year)
-        self.ann_path = './datasets/voc/VOC{}/Annotations'.format(year)
-        self.spl_path = './datasets/voc/VOC{}/ImageSets/Main'.format(year)
 
-    def get_loader(self, transformer, type):
-        custom_voc = VocDataset(
-            self.img_path,
-            self.ann_path,
-            self.spl_path,
-            dataType=type,
-            transformer=transformer)
+        self.img_path = './datasets/voc/train/VOC{}/JPEGImages'.format(year)
+        self.ann_path = './datasets/voc/train/VOC{}/Annotations'.format(year)
+        self.spl_path = './datasets/voc/train/VOC{}/ImageSets/Main'.format(year)
+
+        self.train_path = './datasets/voc/train/VOC{}'.format(year)
+        self.test_path = './datasets/voc/test/VOC{}'.format(year)
+
+    def get_loader(self, transformer, datatype):
+        if datatype == 'train' or datatype == 'val' or datatype == 'trainval':
+            path = self.train_path
+        elif datatype == 'test':
+            path = self.test_path
+        else:
+            AssertionError("[ERROR] Invalid path")
+
+        custom_voc = VocDataset(path,
+                                dataType=datatype,
+                                transformer=transformer)
 
         custom_loader = torch.utils.data.DataLoader(
             dataset=custom_voc,

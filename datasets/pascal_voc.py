@@ -18,6 +18,7 @@ VOC_CLASSES = (
     'sheep', 'sofa', 'train', 'tvmonitor'
 )
 
+
 def scaling(data):
     min_value = min(data)
     max_value = max(data)
@@ -27,11 +28,10 @@ def scaling(data):
 
     return data
 
+
 class VocDataset(data.Dataset):
     def __init__(self,
-                 img_path,
-                 ann_path,
-                 spl_path,
+                 path,
                  dataType='trainval',
                  transformer=None):
         '''
@@ -39,17 +39,15 @@ class VocDataset(data.Dataset):
             transform: augmentation lib : [img], custom : [img, target]
             target_transform: augmentation [target]
         '''
-
-        self.transformer = transformer
-
         type_file = dataType + '.txt'
 
-        with open(os.path.join(spl_path, type_file), 'r') as f:
+        with open(os.path.join(os.path.join(path, 'ImageSets/Main'), type_file), 'r') as f:
             file_names = [x.strip() for x in f.readlines()]
 
-        self.imgs = [os.path.join(img_path, x + '.jpg') for x in file_names]
-        self.anns = [os.path.join(ann_path, x + '.xml') for x in file_names]
-
+        self.imgs = [os.path.join(os.path.join(path, 'JPEGImages'), x + '.jpg') for x in file_names]
+        self.anns = [os.path.join(os.path.join(path, 'Annotations'), x + '.xml') for x in file_names]
+        self.transformer = transformer
+        
         assert (len(self.imgs) == len(self.anns))
 
     def __getitem__(self, index):
@@ -92,5 +90,4 @@ class VocDataset(data.Dataset):
             res[c_id] = 1
 
         #scaling_res = scaling(res)
-
         return res
