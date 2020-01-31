@@ -30,7 +30,7 @@ images = test_transformer(Image.open('cat.jpg')).view(1, 3, 224, 224)
 images = images.to(device)
 
 pred = model(images)
-print(pred.argmax())
+print(pred)
 
 
 

@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from models import load_model
+from focal_loss import FocalLoss
 import torchvision.transforms as transforms
 from datasets.loader import VOC
 
@@ -41,7 +42,8 @@ valid_loader = voc.get_loader(transformer=valid_transformer, type='val')
 
 model = load_model(MODEL_PATH, train=True)
 
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+# Momentum / L2 panalty
+optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=1e-5, momentum=0.9)
 scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
                                            milestones=[50, 100, 150],
                                            gamma=0.1)
