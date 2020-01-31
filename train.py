@@ -3,8 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-from models import load_model
-from focal_loss import FocalLoss
+from torchvision import models
 import torchvision.transforms as transforms
 from datasets.loader import VOC
 
@@ -29,21 +28,27 @@ else:
 # augmentation
 train_transformer = transforms.Compose([transforms.RandomHorizontalFlip(),
                                         transforms.Resize((224, 224)),
-                                        transforms.ToTensor(),
-                                        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
+                                        transforms.ToTensor(),])
 
 valid_transformer = transforms.Compose([transforms.Resize((224, 224)),
-                                        transforms.ToTensor(),
-                                        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))])
+                                        transforms.ToTensor(),])
 
 voc = VOC(batch_size=BATCH_SIZE, year="2007")
-train_loader = voc.get_loader(transformer=train_transformer, type='train')
-valid_loader = voc.get_loader(transformer=valid_transformer, type='val')
+train_loader = voc.get_loader(transformer=train_transformer, datatype='train')
+valid_loader = voc.get_loader(transformer=valid_transformer, datatype='val')
 
-model = load_model(MODEL_PATH, train=True)
+# load model
+model = models.vgg16(pretrained=True).to(device)
+
+# VOC num class 20
+model.classifier[6] = nn.Linear(4096, 20)
+
+# Freezing
+for i, (name, param) in enumerate(model.features.named_parameters()):
+    param.requires_grad = False
 
 # Momentum / L2 panalty
-optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=1e-5, momentum=0.9)
+optimizer = optim.SGD(model.classifier.parameters(), lr=0.001, weight_decay=1e-5, momentum=0.9)
 scheduler = optim.lr_scheduler.MultiStepLR(optimizer=optimizer,
                                            milestones=[50, 100, 150],
                                            gamma=0.1)

@@ -58,17 +58,18 @@ class VGG(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)
         )
-
-        self.dense1 = nn.Linear(512 * 7 * 7, 4096)
-        self.dense2 = nn.Linear(4096, 4096)
-        self.output = nn.Linear(4096, classes)
+        self.classify = nn.Sequential(
+            nn.Linear(512 * 7 * 7, 1024),
+            nn.Dropout(0.1),
+            nn.Linear(1024, 1024),
+            nn.Dropout(0.1),
+            nn.Linear(1024, classes)
+        )
 
     def forward(self, x):
         x = self.vgg16(x)
         x = x.view(x.size(0), -1)
-        x = self.dense1(x)
-        x = self.dense2(x)
-        out = self.output(x)
+        out = self.classify(x)
 
         return out
 
